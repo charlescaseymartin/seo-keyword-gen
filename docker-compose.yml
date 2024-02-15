@@ -1,0 +1,18 @@
+version: '2'
+services:
+  core:
+    image: selenium/standalone-firefox
+    ports:
+      - 4444:4444
+    networks:
+      - selenium-net
+  
+  scraper:
+    build: .
+    depends_on:
+      - core
+    networks:
+      - selenium-net
+
+networks:
+  selenium-net:
