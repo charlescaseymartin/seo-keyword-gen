@@ -9,10 +9,13 @@ services:
   
   scraper:
     build: .
+    restart: on-failure
     depends_on:
       - core
     networks:
       - selenium-net
+    volumes:
+      - ./data:/scraper/data
 
 networks:
   selenium-net:
