@@ -26,7 +26,7 @@ def load_keywords():
 if __name__ == '__main__':
   browser = create_browser_instance()
   main_keywords = load_keywords()
-  print('[*] Scrapping SEO Phrases related to main keywords')
+  print('[*] Extracting SEO Phrases related to main keywords')
   # scrape ATP
-  google.extract_phrases(browser)
+  google.extract_phrases(browser=browser, main_keywords=main_keywords)
   browser.quit()
