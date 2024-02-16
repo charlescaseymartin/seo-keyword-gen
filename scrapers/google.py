@@ -34,8 +34,9 @@ def extract_auto_suggest_phrases(browser: Firefox, main_keywords = []):
       textarea.send_keys('test ')
       sleep(1)
       auto_suggest_list = get_current_page_element(browser=browser, attrs=attrs)
-      auto_suggestions = [suggestion.contents[0].contents[1].contents[0].contents[0].contents[0] for suggestion in auto_suggest_list.contents]
+      auto_suggestions = [suggestion.contents[0].contents[1].contents[0].contents[0].contents[0].get_text() for suggestion in auto_suggest_list.contents]
       print(f'auto-suggestions list item: {auto_suggestions}')
+      print(f'auto-suggestions items count: {len(auto_suggestions)}')
     except Exception as err:
       print(f'Unexpected {err}, {type(err)=}')
 
