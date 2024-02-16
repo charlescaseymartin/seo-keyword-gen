@@ -6,6 +6,6 @@ while [ "$( curl -s http://$SELENIUM_HOST:4444/wd/hub/status | jq -r .value.read
 do
     sleep 1
 done
-echo "[!] Selenium host is ready!"
+echo "[*] Selenium host is ready!"
 
 python main.py
