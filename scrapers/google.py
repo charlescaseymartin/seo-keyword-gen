@@ -43,11 +43,19 @@ def generate_popular_key_phrases(keyword: str):
   return [phrase.replace('<keyword>', keyword) for phrase in popular_phrases]
 
 # Scrape auto-suggestions
-# auto-suggestion div class name: aajZCb
-# auto-suggestion secondary div class name: erkvQe
+# form input div class name: RNNXgb
+# auto-suggestion styled container div class name: UUbT9 EyBRub
 # auto-suggestion textarea id: APjFqb
 # auto-suggestion ul class name: G43f7e
 # auto-suggestion presentation span class name: wM6W7d
+
+def is_focused_auto_suggestions_displayed(browser: Firefox):
+  input_container = browser.find_element(By.CSS_SELECTOR, 'div.RNNXgb')
+  suggestion_list = browser.find_element(By.CSS_SELECTOR, 'div.UUbT9.EyBRub')
+  input_container_size = input_container.size
+  suggestion_list_size = suggestion_list.size
+  return suggestion_list_size < input_container_size
+
 def get_suggestions(browser: Firefox, textarea: WebElement, attrs={}, key_pattern=''):
   try:
     assert len(key_pattern) > 1
