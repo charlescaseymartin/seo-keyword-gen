@@ -21,6 +21,7 @@ def load_keywords():
     for word in lines:
       if word not in keywords:
         keywords.append(word)
+    # [keywords.append(word) for word in lines if word not in keywords]
   return keywords
 
 if __name__ == '__main__':

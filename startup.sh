@@ -8,4 +8,4 @@ do
 done
 echo "[*] Selenium host is ready!"
 
-python main.py
+python main.py >> ./data/logs.txt
