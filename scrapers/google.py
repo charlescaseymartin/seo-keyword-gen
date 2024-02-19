@@ -4,14 +4,13 @@ from selenium.webdriver.remote.webelement import WebElement
 from bs4 import BeautifulSoup
 from time import sleep
 from string import ascii_lowercase
-import array as arr
 
 google_home_page_url = 'https://www.google.com/'
 google_search_url = 'https://www.google.com/search?q='
 
 def get_current_page_element(browser: Firefox, attrs: dict[str] = {}):
   page_source = BeautifulSoup(browser.page_source, 'lxml')
-  return page_source.find(attrs=attrs)
+  return page_source.find(attrs=attrs).contents
 
 def generate_alphabetic_started_key_phrases(keyword: str):
   return [f'{letter} {keyword}' for letter in ascii_lowercase]
@@ -61,16 +60,19 @@ def parse_suggestion_items(suggestions=[]):
   return [replace_encodings(suggestion) for suggestion in suggestions if len(str(suggestion)) > 0]
 
 def get_suggestion_text_container(suggestion_list_item):
+  suggestion_item = suggestion_list_item.find('div', class_='wM6W7d')
+  print(f'suggestion item: {suggestion_item}')
+  print(f'suggestion item: {suggestion_item.contents}')
   return suggestion_list_item.contents[0].contents[1].contents[0].contents[0].contents[0]
 
 def get_auto_suggestions(auto_suggest_list_contents=[]):
   suggestions = [get_suggestion_text_container(suggestion) for suggestion in auto_suggest_list_contents]
-  # print(f'suggestions: {suggestions}')
+  print(f'suggestions: {suggestions}')
   return parse_suggestion_items(suggestions=suggestions)
 
 def get_focused_auto_suggestions(keyword='', auto_suggest_list_contents=[]):
   suggestions = [get_suggestion_text_container(suggestion).b for suggestion in auto_suggest_list_contents if get_suggestion_text_container(suggestion).b is not None]
-  # print(f'suggestions: {suggestions}')
+  print(f'focused suggestions: {suggestions}')
   parsed_suggestions = parse_suggestion_items(suggestions=suggestions)
   return [f'{keyword}{suggestion_item}' for suggestion_item in parsed_suggestions]
 
@@ -78,18 +80,19 @@ def get_suggestions(browser: Firefox, textarea: WebElement, attrs={}, key_patter
   try:
     assert len(key_pattern) > 1
     textarea.clear()
+    textarea.clear()
     textarea.click()
     textarea.send_keys(key_pattern)
-    browser.implicitly_wait(3)
-    # sleep(1)
-    auto_suggest_list = get_current_page_element(browser=browser, attrs=attrs).contents
+    browser.implicitly_wait(5)
+    sleep(5)
+    auto_suggest_list = get_current_page_element(browser=browser, attrs=attrs)
 
     if is_focused_auto_suggestions_displayed(browser=browser):
       print(f'is focused suggestions: {is_focused_auto_suggestions_displayed(browser=browser)}')
       auto_suggestions = get_focused_auto_suggestions(keyword=key_pattern, auto_suggest_list_contents=auto_suggest_list)
     else:
       auto_suggestions = get_auto_suggestions(auto_suggest_list)
-    
+
     return auto_suggestions
   except Exception as err:
     print(f'Unexpected {err}, {type(err)=}')
@@ -108,21 +111,25 @@ def extract_auto_suggest_phrases(browser: Firefox, main_keywords = []):
     generate_popular_key_phrases
   ]
   
-  suggestions = get_suggestions(browser=browser, textarea=textarea, attrs=attrs, key_pattern='jaslkdj hd')
-  print(f'test focused suggestions: {suggestions}')
+  # suggestions = get_suggestions(browser=browser, textarea=textarea, attrs=attrs, key_pattern='jaslkdj hd')
+  # print(f'test focused suggestions: {suggestions}')
 
   # for keyword in main_keywords:
-  # keyword = main_keywords[0]
-  # print(f'[*] Extracting auto-suggestions for {keyword}...')
-  # suggestions = get_suggestions(browser=browser, textarea=textarea, attrs=attrs, key_pattern=keyword)
-  # key_phrases[keyword] = suggestions
-  # for pattern_generator in pattern_generators:
-  #   keyword_patterns = pattern_generator(keyword)
-  #   for key_pattern in keyword_patterns:
-  #     print(f'key_pattern: {key_pattern}')
-  #     key_pattern_suggestions = get_suggestions(browser=browser, textarea=textarea, attrs=attrs, key_pattern=key_pattern)
-  #     print(f'key_pattern_suggestions: {key_pattern_suggestions}')
-  #     key_phrases[keyword].extend(key_pattern_suggestions)
+  keyword = main_keywords[0]
+  print(f'[*] Extracting auto-suggestions for {keyword}...')
+  suggestions = get_suggestions(browser=browser, textarea=textarea, attrs=attrs, key_pattern=keyword)
+  key_phrases[keyword] = suggestions
+  for pattern_generator in pattern_generators:
+    keyword_patterns = pattern_generator(keyword)
+    for key_pattern in keyword_patterns:
+      print(f'key_pattern: {key_pattern}')
+      key_pattern_suggestions = get_suggestions(browser=browser, textarea=textarea, attrs=attrs, key_pattern=key_pattern)
+      print(f'key_pattern_suggestions: {key_pattern_suggestions}')
+      if key_phrases[keyword] is not None:
+        key_phrases[keyword].extend(key_pattern_suggestions) 
+      else:
+        key_phrases[keyword] = key_pattern_suggestions
+    browser.refresh()
 
   # print(f'key_phrases: {key_phrases}')
 
