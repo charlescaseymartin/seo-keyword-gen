@@ -126,10 +126,12 @@ def extract_auto_suggest_phrases(browser: Firefox, main_keywords = []):
       key_pattern_suggestions = get_suggestions(browser=browser, textarea=textarea, attrs=attrs, key_pattern=key_pattern)
       print(f'key_pattern_suggestions: {key_pattern_suggestions}')
       if key_phrases[keyword] is not None:
+        print(f'key_phrases')
         key_phrases[keyword].extend(key_pattern_suggestions) 
       else:
         key_phrases[keyword] = key_pattern_suggestions
     browser.refresh()
+    sleep(10)
 
   # print(f'key_phrases: {key_phrases}')
 
