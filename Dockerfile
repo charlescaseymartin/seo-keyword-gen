@@ -3,5 +3,4 @@ RUN apk add --no-cache --upgrade bash curl jq
 WORKDIR /scraper
 COPY . .
 RUN pip install -r ./requirements.txt
-RUN chmod +x ./startup.sh
-CMD ["./startup.sh"]
+CMD ["python", "./main.py"]
