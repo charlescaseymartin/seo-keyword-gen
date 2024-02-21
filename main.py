@@ -23,7 +23,7 @@ def load_keywords():
   return keywords
 
 if __name__ == '__main__':
-  # wait_for_selenium_to_start()
+  wait_for_selenium_to_start()
   browser = create_browser_instance()
   keywords = load_keywords()
   print('[*] Extracting related topics from keywords...')

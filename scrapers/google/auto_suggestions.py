@@ -39,17 +39,25 @@ class ExtractAutoSuggestions:
     for keyword in self.keywords:
       keyword_key = str(keyword).replace(' ', '_')
       self.keyword_topics[keyword_key] = self.get_topic_suggestions(keyword)
-      keyword_patterns = []
-      [keyword_patterns.extend(gen_patterns(keyword)) for gen_patterns in pattern_generators]
+      # keyword_patterns = []
+      # [keyword_patterns.extend(gen_patterns(keyword)) for gen_patterns in pattern_generators]
+      # print(f'keyword_patterns: {keyword_patterns}')
+
+      alpha_started_key_patterns = self.generate_alphabetic_started_key_phrases
+      alpha_ended_key_patterns = self.generate_alphabetic_ended_key_phrases
+      alpha_started_and_ended_key_patterns = self.generate_alphabetic_started_and_ended_key_phrases
+      alpha_started_and_double_ended_key_patterns = self.generate_alphabetic_started_and_double_ended_key_phrases
+      question_key_patterns = self.generate_question_key_phrases
+      popular_key_patterns = self.generate_popular_key_phrases
       # for key_pattern in keyword_patterns:
       # print(f'[*] Current keyword pattern: {key_pattern}')
       key_pattern_suggestions = []
-      [keyword_patterns.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in keyword_patterns]
+      [key_pattern_suggestions.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in alpha_started_key_patterns]
       print(f'key_pattern_suggestions: {key_pattern_suggestions}')
-      if self.keyword_topics[keyword_key] is not None:
-        self.keyword_topics[keyword_key].extend(key_pattern_suggestions) 
-      else:
-        self.keyword_topics[keyword_key] = key_pattern_suggestions
+      # if self.keyword_topics[keyword_key] is not None:
+      #   self.keyword_topics[keyword_key].extend(key_pattern_suggestions) 
+      # else:
+      #   self.keyword_topics[keyword_key] = key_pattern_suggestions
 
     print(f'keyword topics: {self.keyword_topics}')
 
