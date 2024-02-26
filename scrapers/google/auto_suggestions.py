@@ -33,6 +33,7 @@ class ExtractAutoSuggestions:
       self.get_question_topics(keyword)
       self.get_popular_topics(keyword)
 
+    # save results to file
     self.keyword_topics[keyword.replace(" ", "_")] = list(set(self.keyword_topics[keyword.replace(" ", "_")]))
     print(f'keyword topics{len(self.keyword_topics)}: {self.keyword_topics}')
 
