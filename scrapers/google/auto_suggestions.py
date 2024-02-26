@@ -18,67 +18,62 @@ class ExtractAutoSuggestions:
   keyword_topics = {}
   keywords = []
 
-  def __init__(self, browser: Firefox, keywords = []):
+  def __init__(self, browser: Firefox, keywords: list[str]):
     self.browser = browser
     self.keywords = keywords
     self.browser.get('https://www.google.com/')
-    pass
 
   def run(self):
     self.textarea = self.browser.find_element(By.CSS_SELECTOR, 'textarea#APjFqb')
-    pattern_generators = [
-      self.generate_alphabetic_started_key_phrases,
-      self.generate_alphabetic_ended_key_phrases,
-      self.generate_alphabetic_started_and_ended_key_phrases,
-      self.generate_alphabetic_started_and_double_ended_key_phrases,
-      self.generate_question_key_phrases,
-      self.generate_popular_key_phrases
-    ]
-
+    self.default_topics = self.get_default_topics()
     
     for keyword in self.keywords:
-      keyword_key = str(keyword).replace(' ', '_')
-      self.keyword_topics[keyword_key] = self.get_topic_suggestions(keyword)
-      # keyword_patterns = []
-      # [keyword_patterns.extend(gen_patterns(keyword)) for gen_patterns in pattern_generators]
-      # print(f'keyword_patterns: {keyword_patterns}')
+      self.add_topics_keywords(keyword, self.get_topic_suggestions(keyword))
+      self.get_alphabetic_started_topics(keyword)
+      self.get_alphabetic_ended_topics(keyword)
+      self.get_alphabetic_started_and_ended_topics(keyword)
+      self.get_alphabetic_started_and_double_ended_topics(keyword)
+      self.get_question_topics(keyword)
+      self.get_popular_topics(keyword)
 
-      alpha_started_key_patterns = self.generate_alphabetic_started_key_phrases
-      alpha_ended_key_patterns = self.generate_alphabetic_ended_key_phrases
-      alpha_started_and_ended_key_patterns = self.generate_alphabetic_started_and_ended_key_phrases
-      alpha_started_and_double_ended_key_patterns = self.generate_alphabetic_started_and_double_ended_key_phrases
-      question_key_patterns = self.generate_question_key_phrases
-      popular_key_patterns = self.generate_popular_key_phrases
-      # for key_pattern in keyword_patterns:
-      # print(f'[*] Current keyword pattern: {key_pattern}')
-      key_pattern_suggestions = []
-      [key_pattern_suggestions.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in alpha_started_key_patterns]
-      print(f'key_pattern_suggestions: {key_pattern_suggestions}')
-      # if self.keyword_topics[keyword_key] is not None:
-      #   self.keyword_topics[keyword_key].extend(key_pattern_suggestions) 
-      # else:
-      #   self.keyword_topics[keyword_key] = key_pattern_suggestions
+    self.keyword_topics[keyword.replace(" ", "_")] = list(set(self.keyword_topics[keyword.replace(" ", "_")]))
+    print(f'keyword topics{len(self.keyword_topics)}: {self.keyword_topics}')
 
-    print(f'keyword topics: {self.keyword_topics}')
+  def get_default_topics(self):
+    default_topics = set()
+    try:
+      self.textarea.click()
+      suggestions = self.browser.find_elements(By.CSS_SELECTOR, 'div.wM6W7d span')
+      default_topics = set([suggestion.text for suggestion in suggestions if suggestion.text])
+      return default_topics
+    except Exception as err:
+      print(f'Unexpected {err}, {type(err)=}')
+      return default_topics
 
   def get_topic_suggestions(self, keyword_pattern = ''):
+    suggestions_topics = []
     try:
       assert len(keyword_pattern) > 1
-      self.textarea.clear()
       self.textarea.click()
+      self.textarea.clear()
       self.textarea.send_keys(keyword_pattern)
       sleep(2)
       suggestions = self.browser.find_elements(By.CSS_SELECTOR, 'div.wM6W7d span')
       suggestions_topics = [suggestion.text for suggestion in suggestions if suggestion.text]
-      is_focused_suggestion = self.is_focused_suggestions()
 
+      is_focused_suggestion = self.is_focused_suggestions()
       if is_focused_suggestion:
         focused_suggestions = self.browser.find_elements(By.CSS_SELECTOR, 'div.wM6W7d span b')
         suggestions_topics = [f"{keyword_pattern}{suggestion.text}" for suggestion in focused_suggestions]
 
+      default_topic_check = self.default_topics.union(set(suggestions_topics))
+      if len(default_topic_check) == len(self.default_topics):
+        suggestions_topics = self.get_topic_suggestions(keyword_pattern=keyword_pattern)
+
       return suggestions_topics
     except Exception as err:
       print(f'Unexpected {err}, {type(err)=}')
+      return suggestions_topics
   
   def is_focused_suggestions(self):
     input_container = self.browser.find_element(By.CSS_SELECTOR, 'div.RNNXgb')
@@ -87,23 +82,50 @@ class ExtractAutoSuggestions:
     suggestion_list_size = suggestion_list.size['width']
     return suggestion_list_size < input_container_size
 
-  def generate_alphabetic_started_key_phrases(self, keyword: str):
-    return [f'{letter} {keyword}' for letter in ascii_lowercase]
+  def add_topics_keywords(self, keyword: str, pattern_topics: list):
+    keyword_key = keyword.replace(' ', '_')
+    if keyword_key in self.keyword_topics.keys():
+      self.keyword_topics[keyword_key].extend(pattern_topics)
+    else:
+      self.keyword_topics[keyword_key] = pattern_topics
 
-  def generate_alphabetic_ended_key_phrases(self, keyword: str):
-    return [f'{keyword} {letter}' for letter in ascii_lowercase]
+  def get_alphabetic_started_topics(self, keyword: str):
+    key_patterns = [f'{letter} {keyword}' for letter in ascii_lowercase]
+    pattern_topics = []
+    [pattern_topics.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in key_patterns]
+    self.add_topics_keywords(keyword, pattern_topics) 
+    print(f'[*] Extracted alphabetical started topics for: {keyword}')
 
-  def generate_alphabetic_started_and_ended_key_phrases(self, keyword: str):
-    return [f'{letter} {keyword} {letter}' for letter in ascii_lowercase]
+  def get_alphabetic_ended_topics(self, keyword: str):
+    key_patterns = [f'{keyword} {letter}' for letter in ascii_lowercase]
+    pattern_topics = []
+    [pattern_topics.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in key_patterns]
+    self.add_topics_keywords(keyword, pattern_topics) 
+    print(f'[*] Extracted alphabetical ended topics for: {keyword}')
 
-  def generate_alphabetic_started_and_double_ended_key_phrases(self, keyword: str):
-    return [f'{letter} {keyword} {letter}{letter}' for letter in ascii_lowercase]
+  def get_alphabetic_started_and_ended_topics(self, keyword: str):
+    key_patterns = [f'{letter} {keyword} {letter}' for letter in ascii_lowercase]
+    pattern_topics = []
+    [pattern_topics.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in key_patterns]
+    self.add_topics_keywords(keyword, pattern_topics)
+    print(f'[*] Extracted alphabetical started and ended topics for: {keyword}')
 
-  def generate_question_key_phrases(self, keyword: str):
+  def get_alphabetic_started_and_double_ended_topics(self, keyword: str):
+    key_patterns = [f'{letter} {keyword} {letter}{letter}' for letter in ascii_lowercase]
+    pattern_topics = []
+    [pattern_topics.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in key_patterns]
+    self.add_topics_keywords(keyword, pattern_topics)
+    print(f'[*] Extracted alphabetical started and double ended topics for: {keyword}')
+
+  def get_question_topics(self, keyword: str):
     questions = ['how', 'how to', 'how do', 'why do', 'what', 'is', 'do', 'does a']
-    return [f'{question} {keyword}' for question in questions]
+    key_patterns = [f'{question} {keyword}' for question in questions]
+    pattern_topics = []
+    [pattern_topics.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in key_patterns]
+    self.add_topics_keywords(keyword, pattern_topics)
+    print(f'[*] Extracted question topics for: {keyword}')
 
-  def generate_popular_key_phrases(self, keyword: str):
+  def get_popular_topics(self, keyword: str):
     popular_phrases = [
       'Best <keyword> *',
       'Best <keyword> for *',
@@ -114,5 +136,8 @@ class ExtractAutoSuggestions:
       '<keyword> vs *',
       '<keyword> * reviews'
     ]
-    return [phrase.replace('<keyword>', keyword) for phrase in popular_phrases]
-  
+    key_patterns = [phrase.replace('<keyword>', keyword) for phrase in popular_phrases]
+    pattern_topics = []
+    [pattern_topics.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in key_patterns]
+    self.add_topics_keywords(keyword, pattern_topics)
+    print(f'[*] Extracted popular topics for: {keyword}')
