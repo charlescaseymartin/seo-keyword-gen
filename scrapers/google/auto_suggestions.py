@@ -1,10 +1,7 @@
 from selenium.webdriver import Firefox
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
-from bs4 import BeautifulSoup
 from time import sleep
 from string import ascii_lowercase
-from utils import wait_for_selenium_to_start
 
 # Scrape auto-suggestions
 # form input div class name: RNNXgb
@@ -15,8 +12,8 @@ from utils import wait_for_selenium_to_start
 
 class ExtractAutoSuggestions:
   browser: Firefox
-  keyword_topics = {}
-  keywords = []
+  keyword_topics: dict
+  keywords: list[str]
 
   def __init__(self, browser: Firefox, keywords: list[str]):
     self.browser = browser
@@ -50,7 +47,7 @@ class ExtractAutoSuggestions:
       print(f'Unexpected {err}, {type(err)=}')
       return default_topics
 
-  def get_topic_suggestions(self, keyword_pattern = ''):
+  def get_topic_suggestions(self, keyword_pattern: str):
     suggestions_topics = []
     try:
       assert len(keyword_pattern) > 1
