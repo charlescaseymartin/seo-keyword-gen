@@ -4,13 +4,6 @@ from time import sleep
 from string import ascii_lowercase
 from common.utils import save_results_to_file
 
-# Scrape auto-suggestions
-# form input div class name: RNNXgb
-# auto-suggestion styled container div class name: UUbT9 EyBRub
-# auto-suggestion textarea id: APjFqb
-# auto-suggestion ul class name: G43f7e
-# auto-suggestion presentation span class name: wM6W7d
-
 class ExtractAutoSuggestions:
   browser: Firefox
   keyword_topics: dict
