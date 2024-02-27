@@ -2,7 +2,7 @@ from selenium.webdriver import Firefox
 from selenium.webdriver.common.by import By
 from time import sleep
 from string import ascii_lowercase
-from utils import save_results_to_file
+from common.utils import save_results_to_file
 
 # Scrape auto-suggestions
 # form input div class name: RNNXgb
@@ -36,8 +36,6 @@ class ExtractAutoSuggestions:
       keyword_key = keyword.replace(' ', '_')
       self.keyword_topics[keyword_key] = list(set(self.keyword_topics[keyword_key]))
     save_results_to_file('auto_suggestions', self.keyword_topics)
-    # save_results_to_file('test-sample', {'test-sample': [], '2-test-sample': []})
-    save_results_to_file('test-sample', {'test-sample': ['test string', 'test string', 'test string'], '2-test-sample': ['test string', 'test string', 'test string']})
 
   def get_default_topics(self):
     default_topics = set()
