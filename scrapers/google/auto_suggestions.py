@@ -2,6 +2,7 @@ from selenium.webdriver import Firefox
 from selenium.webdriver.common.by import By
 from time import sleep
 from string import ascii_lowercase
+from utils import save_results_to_file
 
 # Scrape auto-suggestions
 # form input div class name: RNNXgb
@@ -19,11 +20,11 @@ class ExtractAutoSuggestions:
     self.browser = browser
     self.keywords = keywords
     self.browser.get('https://www.google.com/')
+    self.keyword_topics = {}
 
   def run(self):
     self.textarea = self.browser.find_element(By.CSS_SELECTOR, 'textarea#APjFqb')
     self.default_topics = self.get_default_topics()
-    
     for keyword in self.keywords:
       self.add_topics_keywords(keyword, self.get_topic_suggestions(keyword))
       self.get_alphabetic_started_topics(keyword)
@@ -32,10 +33,11 @@ class ExtractAutoSuggestions:
       self.get_alphabetic_started_and_double_ended_topics(keyword)
       self.get_question_topics(keyword)
       self.get_popular_topics(keyword)
-
-    # save results to file
-    self.keyword_topics[keyword.replace(" ", "_")] = list(set(self.keyword_topics[keyword.replace(" ", "_")]))
-    print(f'keyword topics{len(self.keyword_topics)}: {self.keyword_topics}')
+      keyword_key = keyword.replace(' ', '_')
+      self.keyword_topics[keyword_key] = list(set(self.keyword_topics[keyword_key]))
+    save_results_to_file('auto_suggestions', self.keyword_topics)
+    # save_results_to_file('test-sample', {'test-sample': [], '2-test-sample': []})
+    save_results_to_file('test-sample', {'test-sample': ['test string', 'test string', 'test string'], '2-test-sample': ['test string', 'test string', 'test string']})
 
   def get_default_topics(self):
     default_topics = set()

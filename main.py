@@ -1,11 +1,7 @@
 from selenium import webdriver
-import requests
-import time
 from constants import REMOTE_WEBDRIVER, KEYWORDS_FILE_PATH
 from utils import wait_for_selenium_to_start
 from scrapers import google
-
-
 
 def create_browser_instance():
   print('[*] Setting up browser instance...')
