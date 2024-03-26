@@ -2,7 +2,7 @@ import requests
 import time
 import os
 import json
-from constants import REMOTE_WEBDRIVER, TOPICS_RESULTS_FILE_PATH
+from common.constants import REMOTE_WEBDRIVER, TOPICS_RESULTS_FILE_PATH
 
 def get_selenium_status():
   try:
