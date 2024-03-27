@@ -1,0 +1,29 @@
+version: '3'
+services:
+  core:
+    image: selenium/standalone-firefox
+    shm_size: '2gb'
+    environment:
+      - SE_NODE_SESSION_TIMEOUT=1800
+      - SCREEN_WIDTH=1920
+      - SCREEN_HEIGHT=1080
+    ports:
+      - 4444:4444
+    networks:
+      - selenium-net
+
+  scrapper:
+    build: .
+    depends_on:
+      - core
+    develop:
+      watch:
+        - action: rebuild
+          path: .
+    networks:
+      - selenium-net
+    volumes:
+      - ./data:/scraper/data
+
+networks:
+  selenium-net:
