@@ -42,7 +42,7 @@ if __name__ == '__main__':
         print('[*] Extracted keyword/s')
         wait_for_selenium_to_start()
         browser = create_browser_instance()
-        print('[*] Browser is ready')
+        print('[*] Browser instance is ready')
         scrappers.run(browser, keywords)
         browser.quit()
     else:

@@ -1,8 +1,10 @@
 from selenium.webdriver import Firefox
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from time import sleep
 from string import ascii_lowercase
 from common.utils import save_results_to_file
+import sys
 
 class ExtractAutoSuggestions:
     browser: Firefox
@@ -16,24 +18,34 @@ class ExtractAutoSuggestions:
         self.keyword_topics = {}
 
     def run(self):
-        print(self.keywords)
+        self.handle_consent_popup()
         self.textarea = self.browser.find_element(By.CSS_SELECTOR, 'textarea#APjFqb')
         self.default_topics = self.get_default_topics()
         for keyword in self.keywords:
-           self.add_topics_keywords(keyword, self.get_topic_suggestions(keyword))
-           self.get_alphabetic_started_topics(keyword)
-           self.get_alphabetic_ended_topics(keyword)
-           self.get_alphabetic_started_and_ended_topics(keyword)
-           self.get_alphabetic_started_and_double_ended_topics(keyword)
-           self.get_question_topics(keyword)
-           self.get_popular_topics(keyword)
-           keyword_key = keyword.replace(' ', '_')
-           self.keyword_topics[keyword_key] = list(set(self.keyword_topics[keyword_key]))
+            print(f'[*] Current keyword: {keyword}')
+            self.add_topics_keywords(keyword, self.get_topic_suggestions(keyword))
+            print(' +  Extracted default suggestions')
+            self.get_alphabetic_started_topics(keyword)
+            self.get_alphabetic_ended_topics(keyword)
+            self.get_alphabetic_started_and_ended_topics(keyword)
+            self.get_alphabetic_started_and_double_ended_topics(keyword)
+            self.get_question_topics(keyword)
+            self.get_popular_topics(keyword)
+            keyword_key = keyword.replace(' ', '_')
+            self.keyword_topics[keyword_key] = list(set(self.keyword_topics[keyword_key]))
         save_results_to_file('auto_suggestions', self.keyword_topics)
+        print('[*] Saved Auto Complete Suggestions.')
+
+    def handle_consent_popup(self):
+        consent_popup = self.browser.find_element(By.CSS_SELECTOR, 'div#xe7COe')
+        if consent_popup.is_displayed():
+            reject_btn = self.browser.find_element(By.CSS_SELECTOR, 'button#W0wltc')
+            reject_btn.click()
 
     def get_default_topics(self):
         default_topics = set()
         try:
+            self.textarea.clear()
             self.textarea.click()
             suggestions = self.browser.find_elements(By.CSS_SELECTOR, 'div.wM6W7d span')
             default_topics = set([suggestion.text for suggestion in suggestions if suggestion.text])
@@ -46,10 +58,10 @@ class ExtractAutoSuggestions:
         suggestions_topics = []
         try:
             assert len(keyword_pattern) > 1
-            self.textarea.click()
             self.textarea.clear()
             self.textarea.send_keys(keyword_pattern)
-            sleep(2)
+            sleep(1)
+            self.textarea.click()
             suggestions = self.browser.find_elements(By.CSS_SELECTOR, 'div.wM6W7d span')
             suggestions_topics = [suggestion.text for suggestion in suggestions if suggestion.text]
 
@@ -58,8 +70,8 @@ class ExtractAutoSuggestions:
                 focused_suggestions = self.browser.find_elements(By.CSS_SELECTOR, 'div.wM6W7d span b')
                 suggestions_topics = [f"{keyword_pattern}{suggestion.text}" for suggestion in focused_suggestions]
 
-            default_topic_check = self.default_topics.union(set(suggestions_topics))
-            if len(default_topic_check) == len(self.default_topics):
+            default_topic_check = set(suggestions_topics).union(self.default_topics)
+            if len(suggestions_topics) > 0 and len(default_topic_check) == len(self.default_topics):
                 suggestions_topics = self.get_topic_suggestions(keyword_pattern=keyword_pattern)
 
             return suggestions_topics
@@ -86,28 +98,28 @@ class ExtractAutoSuggestions:
         pattern_topics = []
         [pattern_topics.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in key_patterns]
         self.add_topics_keywords(keyword, pattern_topics)
-        print(f'[*] Extracted alphabetical started topics for: {keyword}')
+        print(f' +  Extracted alphabetical started topics')
 
     def get_alphabetic_ended_topics(self, keyword: str):
         key_patterns = [f'{keyword} {letter}' for letter in ascii_lowercase]
         pattern_topics = []
         [pattern_topics.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in key_patterns]
         self.add_topics_keywords(keyword, pattern_topics)
-        print(f'[*] Extracted alphabetical ended topics for: {keyword}')
+        print(f' +  Extracted alphabetical ended topics')
 
     def get_alphabetic_started_and_ended_topics(self, keyword: str):
         key_patterns = [f'{letter} {keyword} {letter}' for letter in ascii_lowercase]
         pattern_topics = []
         [pattern_topics.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in key_patterns]
         self.add_topics_keywords(keyword, pattern_topics)
-        print(f'[*] Extracted alphabetical started and ended topics for: {keyword}')
+        print(f' +  Extracted alphabetical started and ended topics')
 
     def get_alphabetic_started_and_double_ended_topics(self, keyword: str):
         key_patterns = [f'{letter} {keyword} {letter}{letter}' for letter in ascii_lowercase]
         pattern_topics = []
         [pattern_topics.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in key_patterns]
         self.add_topics_keywords(keyword, pattern_topics)
-        print(f'[*] Extracted alphabetical started and double ended topics for: {keyword}')
+        print(f' +  Extracted alphabetical started and double ended topics')
 
     def get_question_topics(self, keyword: str):
         questions = ['how', 'how to', 'how do', 'why do', 'what', 'is', 'do', 'does a']
@@ -115,7 +127,7 @@ class ExtractAutoSuggestions:
         pattern_topics = []
         [pattern_topics.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in key_patterns]
         self.add_topics_keywords(keyword, pattern_topics)
-        print(f'[*] Extracted question topics for: {keyword}')
+        print(f' +  Extracted question topics')
 
     def get_popular_topics(self, keyword: str):
         popular_phrases = [
@@ -132,4 +144,4 @@ class ExtractAutoSuggestions:
         pattern_topics = []
         [pattern_topics.extend(self.get_topic_suggestions(key_pattern)) for key_pattern in key_patterns]
         self.add_topics_keywords(keyword, pattern_topics)
-        print(f'[*] Extracted popular topics for: {keyword}')
+        print(f' +  Extracted popular topics')
