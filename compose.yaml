@@ -1,6 +1,6 @@
 version: '3'
 services:
-  core:
+  selenium:
     image: selenium/standalone-firefox
     shm_size: '2gb'
     environment:
@@ -15,7 +15,7 @@ services:
   scrapper:
     build: .
     depends_on:
-      - core
+      - selenium
     networks:
       - selenium-net
     volumes:

@@ -3,7 +3,7 @@ import os
 from selenium import webdriver
 from common.constants import REMOTE_WEBDRIVER
 from common.utils import wait_for_selenium_to_start
-import scrappers
+import scrapper
 
 def create_browser_instance():
     options = webdriver.FirefoxOptions()
@@ -32,7 +32,7 @@ def usage():
 
     -h          Shows this menu
 
-    -k [path]   A text file (.txt) containing coma separated list of
+    -k [path]   A text file (.txt) containing comma separated list of
                 keywords to generate topic authority''')
 
 if __name__ == '__main__':
@@ -43,7 +43,7 @@ if __name__ == '__main__':
         wait_for_selenium_to_start()
         browser = create_browser_instance()
         print('[*] Browser instance is ready')
-        scrappers.run(browser, keywords)
+        scrapper.search_topics(browser, keywords)
         browser.quit()
     else:
         usage()
