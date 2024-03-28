@@ -1,3 +1,4 @@
+from selenium.webdriver import Firefox
 
 # search auto-suggestions
 # extract the people also asked questions for each search result
@@ -15,6 +16,6 @@
 #   - html structure
 #   - keyword density
 
-class TopSearchResults:
-  def __init__(self):
-    pass
+def search_topics(browser: Firefox, topics: list[str]):
+    print('[*] Starting search')
+    print(f'topics {topics}')
