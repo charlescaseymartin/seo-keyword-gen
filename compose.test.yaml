@@ -13,13 +13,11 @@ services:
       - selenium-net
 
   scrapper:
-    build: .
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.test
     depends_on:
       - selenium
-    develop:
-      watch:
-        - action: rebuild
-          path: .
     networks:
       - selenium-net
     volumes:

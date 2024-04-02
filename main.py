@@ -1,13 +1,15 @@
 import sys
 import os
-import scrapper
+from scrapper import ScrapeTopResults
+
 
 def invalid_topic_file():
     print('Invalid topic file. Read help menu for more')
     sys.exit(1)
 
-def load_topics(topic_path:str):
-    if len(topic_path) > 0 and os.path.isfile(topic_path) == False:
+
+def load_topics(topic_path: str):
+    if len(topic_path) > 0 and os.path.isfile(topic_path) is False:
         invalid_topic_file()
     topics = []
     with open(topic_path, 'r+') as topic_file:
@@ -17,6 +19,7 @@ def load_topics(topic_path:str):
         invalid_topic_file()
     return topics
 
+
 def usage():
     print('''This is the help menu for Topic Authority Generator!
 
@@ -25,11 +28,13 @@ def usage():
     -t [path]   A text file (.txt) containing comma separated list of
                 topics to generate topic authority''')
 
+
 if __name__ == '__main__':
     args = sys.argv
     if len(args) > 1 and args[1] == '-k' and 2 < len(args):
         topics = load_topics(topic_path=args[2])
         print('[*] Topic/s loaded')
-        scrapper.search_topics(topics)
+        print(f'topics: {topics}')
+        ScrapeTopResults().search_topics(topics)
     else:
         usage()

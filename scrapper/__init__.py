@@ -1,6 +1,4 @@
 import urllib.parse
-import sys
-from selenium.webdriver import Firefox
 from selenium.webdriver.common.by import By
 from browser import WebBrowser
 
@@ -22,29 +20,30 @@ from browser import WebBrowser
 #   - html structure
 #   - keyword density
 
-browser = WebBrowser().browser
-BASE_URL = 'https://www.google.com/search?'
-BOT_CHECK_URL = 'https://www.google.com/sorry/index'
 
-def get_top_pages(browser: Firefox):
-    results = browser.find_elements(By.CSS_SELECTOR, 'div.g.Ww4FFb.vt6azd.tF2Cxc.asEBEc')
-    print(results)
+class ScrapeTopResults:
+    browser = WebBrowser().browser
+    BASE_URL = 'https://www.google.com/search?'
+    BOT_CHECK_URL = 'https://www.google.com/sorry/index'
 
-def topic_search(topic: str):
-    params = urllib.parse.urlencode({ 'q': topic })
-    url = f'{BASE_URL}{params}'
-    browser.get(url)
+    def get_top_pages(self):
+        selector = 'div.g.Ww4FFb.vt6azd.tF2Cxc.asEBEc'
+        results = self.browser.find_elements(By.CSS_SELECTOR, selector)
+        print(results)
 
-        if BOT_CHECK_URL in browser.current_url:
+    def topic_search(self, topic: str):
+        params = urllib.parse.urlencode({'q': topic})
+        url = f'{self.BASE_URL}{params}'
+        self.browser.get(url)
+        if self.BOT_CHECK_URL in self.browser.current_url:
             print('[*] Blocked by robot check')
-            browser = WebBrowser().browser
-            topic_search(topic)
+            self.browser = WebBrowser().browser
+            self.topic_search(topic)
+        print(f'current title: {self.browser.title}')
+        print(f'current url: {self.browser.current_url}')
+        # get_top_pages(browser)
 
-    print(f'current title: {browser.title}')
-    print(f'current url: {browser.current_url}')
-    #get_top_pages(browser)
-
-def search_topics(topics: list[str]):
-    print('[*] Starting search')
-    for topic in topics:
-        topic_search(topic)
+    def search_topics(self, topics: list[str]):
+        print('[*] Starting search')
+        for topic in topics:
+            self.topic_search(topic)
