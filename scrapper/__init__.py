@@ -21,6 +21,7 @@ from browser import WebBrowser
 #   - keyword density
 
 
+
 class ScrapeTopResults:
     browser = WebBrowser().browser
     BASE_URL = 'https://www.google.com/search?'

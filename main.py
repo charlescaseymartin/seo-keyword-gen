@@ -3,6 +3,30 @@ import os
 from scrapper import ScrapeTopResults
 
 
+# curl \
+# -A "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0" \
+# "https://www.google.com/complete/search?client=chrome&q=pledge" \
+# | grep "g Ww4FFb vt6azd tF2Cxc asEBEc" \
+# > search-response
+#
+# search auto-suggestions
+# extract the people also asked questions for each search result
+# extract the related searches for each search result
+# extract the top 5 results for each search
+# result container selector: div.g.Ww4FFb.vt6azd.tF2Cxc.asEBEc
+# result links selector: a[jsname="UWckNb"]
+# extract the following for each top result:
+#   - meta description
+#   - meta keywords
+#   - schema mark up
+#   - canonical tag
+#   - header tag
+#   - image alt description
+#   - xml sitemap
+#   - robots.txt
+#   - html structure
+#   - keyword density
+
 def invalid_topic_file():
     print('Invalid topic file. Read help menu for more')
     sys.exit(1)
